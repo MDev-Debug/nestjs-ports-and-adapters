@@ -1,27 +1,25 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { CreateUserDto } from 'src/application/users/dto/create-user.dto';
 import { ResponseUserDto } from 'src/application/users/dto/response-user.dto';
-import { UpdateUserDto } from 'src/application/users/dto/update-user.dto';
+import { UserEntity } from 'src/domain/entities/users/user.entity';
+import { UserInterfaceRepository } from 'src/domain/interfaces/repositories/users/user.interface.repository';
 import { UsersServiceInterface } from 'src/domain/interfaces/services/users/users.interface.service';
+import { TOKENS } from 'src/presentation/config/tokens.di';
 
 @Injectable()
 export class UsersService implements UsersServiceInterface {
 
+  constructor(
+    @Inject(TOKENS.USER_REPOSITORY)
+    private readonly userRepository: UserInterfaceRepository ) {}
+
   async create(createUserDto: CreateUserDto): Promise<CreateUserDto> {
-    throw new Error('Method not implemented.');
+    await this.userRepository.create(new UserEntity(createUserDto.name, createUserDto.email));
+    return createUserDto;
   }
+
   async findAll(): Promise<ResponseUserDto[]> {
-    throw new Error('Method not implemented.');
-  }
-  async findById(id: number): Promise<ResponseUserDto> {
-    const user = new ResponseUserDto();
-    user.name = 'John Doe';
-    return user;
-  }
-  async update(id: number, updateUserDto: UpdateUserDto): Promise<UpdateUserDto> {
-    throw new Error('Method not implemented.');
-  }
-  async remove(id: number): Promise<void> {
-    throw new Error('Method not implemented.');
+    const response = await this.userRepository.findAll();
+    return response;
   }
 }
